@@ -114,5 +114,78 @@ DataNode会定时发送心跳到NameNode。如果一段时间内NameNode没有�
 #### Zookeeper -> 为Hbase提供稳定服务和failover机制（保证Hbase的稳定正常运行）
 #### Sqoop为Hbase提供从关系型数据库（Mysql/Oracle）导入数据的功能
 
+---
+> >
+> >
+> >
+> >
+## Python与Hadoop结合：
+#### 1. Snakebite实现Python与HDFS交互
+>
+#### 2.Python操作MapReduce
+##### MapReduce的三个阶段：
+1. Map 接受Key-Value对的输入并输出Key-Value对。
+2. Shuffle and Sort
+3. Reduce Reducer函数接收Iterator形式的数据流，并且将相同Key的数据做运算获得输出。
+
+#### Hadoop Streaming
+- #####  Hadoop Streaming提供了一个便于进行MapReduce编程的工具包，使用它可以基于一些可执行命令、脚本语言或其他编程语言来实现Mapper和 Reducer，从而充分利用Hadoop并行计算框架的优势和能力，来处理大数据。
+- ##### 因此Python可以通过Hadoop Streaming来进行Map和Reduce
+- ###### 示例：
+```
+ hadoop jar \
+$HADOOP_HOME/libexec/share/hadoop/tools/lib/hadoop-streaming-2.7.3.jar \
+ -files mapper.py,reducer.py \
+-mapper mapper.py \
+-reducer reducer.py \
+-input /user/hduser/input.txt \
+-output /user/hduser/output
+```
+
+### mrjob实现Python操控Hadoop Streaming
+
+##### mrjob是一个Python库，实现了Hadoop的MapReduce操作。它封装了Hadoop streaming，可以让人用全Python的脚本实现Hadoop计算。它甚至可以让人在没有Hadoop环境下完成测试，并允许用户将mapper和reducer写进一个类里。简直是神器！
+
+- #### 安装
+###### 一句话，pip依然那么轻松写意dyis
+
+
+```
+$ pip install mrjob
+```
+
+Python代码
+
+
+```
+from mrjob.job import MRJob
+
+class MRWordCount(MRJob):
+    def mapper(self, _, line):
+        for word in line.split():
+            yield(word, 1)
+
+    def reducer(self, word, counts):
+        yield(word, sum(counts))
+
+if __name__ == '__main__':
+    MRWordCount.run()
+```
+
+- 运行
+
+
+```
+$ python word_count.py input.txt
+"be"    2
+"jack"  3
+"me"    1
+"nimble"    1
+"quick" 2
+```
+
+简单明了优雅，甚至不需要安装Hadoop
+
+
 
 
